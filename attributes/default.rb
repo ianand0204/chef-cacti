@@ -15,8 +15,11 @@ default['cacti']['group'] = value_for_platform(
   %w(pld) => {
     'default' => 'http'
   },
-  %w(centos fedora redhat ubuntu) => {
+  %w(centos fedora redhat) => {
     'default' => 'apache'
+  },
+  %w(debian ubuntu) => {
+    'default' => 'www-data'
   }
 )
 
@@ -75,18 +78,30 @@ default['cacti']['version'] = value_for_platform(
 default['cacti']['admin']['password'] = 'changeit'
 
 # Apache2 attributes
+case node.platform
+when 'ubuntu', 'debian'
+  default['cacti']['apache2']['conf_dir'] = '/etc/apache2/conf.d'
+  default['cacti']['apache2']['doc_root'] = '/var/www'
+when 'centos', 'rhel', 
+  default['cacti']['apache2']['conf_dir'] = '/etc/httpd/conf.d'
+  default['cacti']['apache2']['doc_root'] = '/var/www/html'
+end
 
-default['cacti']['apache2']['conf_dir'] = '/etc/httpd/conf.d'
-default['cacti']['apache2']['doc_root'] = '/var/www/html'
+#default['cacti']['apache2']['conf_dir'] = '/etc/httpd/conf.d'
+#default['cacti']['apache2']['doc_root'] = '/var/www/html'
 default['cacti']['apache2']['server_aliases'] = [node['hostname']]
 default['cacti']['apache2']['server_name'] = node['fqdn']
 
 default['cacti']['apache2']['ssl']['certificate_file'] = value_for_platform(
+
   %w(pld) => {
     'default' => '/etc/httpd/ssl/server.crt'
   },
-  %w(centos fedora redhat ubuntu) => {
+  %w(centos fedora redhat) => {
     'default' => '/etc/pki/tls/certs/localhost.crt'
+  },
+  %w(ubuntu debian) => {
+    'default' => '/etc/ssl/certs/ssl-cert-snakeoil.pem'
   }
 )
 
@@ -97,8 +112,11 @@ default['cacti']['apache2']['ssl']['key_file'] = value_for_platform(
   %w(pld) => {
     'default' => '/etc/httpd/ssl/server.key'
   },
-  %w(centos fedora redhat ubuntu) => {
+  %w(centos fedora redhat) => {
     'default' => '/etc/pki/tls/private/localhost.key'
+  },
+  %w(ubuntu debian) => {
+    'default' => '/etc/ssl/private/ssl-cert-snakeoil.key'
   }
 )
 

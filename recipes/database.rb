@@ -51,10 +51,16 @@ if settings['database']['host'] == 'localhost'
 
   mysql_database_user settings['database']['user'] do
     connection database_connection
-    host '%'
+    host 'localhost'
     password settings['database']['password']
     database_name settings['database']['name']
     action [:create, :grant]
+  end
+
+  mysql_database 'flush privs' do
+    connection database_connection
+    sql 'flush privileges'
+    action :query
   end
 
   # Configure base Cacti settings in database
@@ -66,8 +72,11 @@ if settings['database']['host'] == 'localhost'
       %w(pld) => {
         'default' => '/var/log/cacti/cacti.log'
       },
-      %w(centos fedora redhat ubuntu) => {
+      %w(centos fedora redhat) => {
         'default' => '/usr/share/cacti/log/cacti.log'
+      },
+      %w(debian ubuntu) => {
+        'default' => '/var/log/cacti.log'
       }
     )
 
